@@ -11,14 +11,13 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Connecting to database - using local or cloud MongoDB
+// Connecting to database - using local MongoDB (port 27017) with blogDB database name
 main().catch(err => console.log(err));
 async function main() {
-  const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/test';
-  await mongoose.connect(mongoURI, { useNewUrlParser: true });
+  await mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true });
   console.log("Connected to MongoDB successfully.");
 }
 
@@ -51,7 +50,7 @@ const contactSchema = new mongoose.Schema({
 const Contact = mongoose.model("Contact", contactSchema);
 
 // API Routes
-app.get("/api/posts", function(req, res){
+app.get("/api/posts", function (req, res) {
   Post.find().then(posts => {
     res.json({
       startingContent: homeStartingContent,
@@ -62,15 +61,15 @@ app.get("/api/posts", function(req, res){
   });
 });
 
-app.get("/api/about", function(req, res){
+app.get("/api/about", function (req, res) {
   res.json({ aboutContent: aboutContent });
 });
 
-app.get("/api/contact", function(req, res){
+app.get("/api/contact", function (req, res) {
   res.json({ contactContent: contactContent });
 });
 
-app.post("/api/posts", function(req, res){
+app.post("/api/posts", function (req, res) {
   const post = new Post({
     title: req.body.title,
     content: req.body.content
@@ -80,23 +79,23 @@ app.post("/api/posts", function(req, res){
     console.log('Post added to DB.');
     res.status(201).json(savedPost);
   })
-  .catch(err => {
-    res.status(400).json({ error: "Unable to save post to database." });
-  });
+    .catch(err => {
+      res.status(400).json({ error: "Unable to save post to database." });
+    });
 });
 
-app.get("/api/posts/:postId", function(req, res){
+app.get("/api/posts/:postId", function (req, res) {
   const requestedPostId = req.params.postId;
 
-  Post.findOne({_id: requestedPostId})
-    .then(function(post) {
+  Post.findOne({ _id: requestedPostId })
+    .then(function (post) {
       if (post) {
         res.json(post);
       } else {
         res.status(404).json({ error: "Post not found" });
       }
     })
-    .catch(function(err){
+    .catch(function (err) {
       res.status(400).json({ error: "Invalid post ID format" });
     });
 });
@@ -120,6 +119,6 @@ app.post("/api/contact", (req, res) => {
     });
 });
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("Server started on port 3000");
 });
